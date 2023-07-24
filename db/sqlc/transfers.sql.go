@@ -9,25 +9,24 @@ import (
 	"context"
 )
 
-const createTransfers = `-- name: CreateTransfers :one
+const createTransfer = `-- name: CreateTransfer :one
 INSERT INTO transfers (
     from_account_id,
     to_account_id,
     amount
 ) VALUES (
-          $1, $2, $3
-         )
-    RETURNING id, from_account_id, to_account_id, amount, created_at
+             $1, $2, $3
+         ) RETURNING id, from_account_id, to_account_id, amount, created_at
 `
 
-type CreateTransfersParams struct {
+type CreateTransferParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
 	Amount        int64 `json:"amount"`
 }
 
-func (q *Queries) CreateTransfers(ctx context.Context, arg CreateTransfersParams) (Transfer, error) {
-	row := q.db.QueryRowContext(ctx, createTransfers, arg.FromAccountID, arg.ToAccountID, arg.Amount)
+func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
+	row := q.db.QueryRowContext(ctx, createTransfer, arg.FromAccountID, arg.ToAccountID, arg.Amount)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
@@ -57,7 +56,7 @@ func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 	return i, err
 }
 
-const listTransfer = `-- name: ListTransfer :many
+const listTransfers = `-- name: ListTransfers :many
 SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
 WHERE
         from_account_id = $1 OR
@@ -67,15 +66,15 @@ ORDER BY id
 OFFSET $4
 `
 
-type ListTransferParams struct {
+type ListTransfersParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
 	Limit         int32 `json:"limit"`
 	Offset        int32 `json:"offset"`
 }
 
-func (q *Queries) ListTransfer(ctx context.Context, arg ListTransferParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, listTransfer,
+func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error) {
+	rows, err := q.db.QueryContext(ctx, listTransfers,
 		arg.FromAccountID,
 		arg.ToAccountID,
 		arg.Limit,
