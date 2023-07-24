@@ -10,5 +10,7 @@ downgrade:
 	migrate -path db/migration -database "postgresql://root:root@localhost:1000/SimpleBank?sslmode=disable" -verbose down
 sqlc:
 	sqlc generate
+test:
+	go test -v -cover ./...
 
-.PHONY:postgres createdb dropdb migrate downgrade sqlc
+.PHONY:postgres createdb dropdb migrate downgrade sqlc test
